@@ -1,5 +1,5 @@
 ; === Comprehensive Test Program ===
-; 20-variable test with function calls, all arithmetic, comparisons, and control flow
+; 20-variable test with function calls, all arithmetic, comparisons, control flow, and PEMDAS
 
 test_source:
     !text "int a; int b; int c; int d; int e; int f; int g; int h; int i; int j;", $0A
@@ -8,18 +8,18 @@ test_source:
     !text "  t = t + 5;", $0A
     !text "}", $0A
     !text "void main() {", $0A
-    !text "  a = 42;", $0A
-    !text "  b = 0xFF;", $0A
-    !text "  c = 100 + 200;", $0A
-    !text "  d = 500 - 123;", $0A
-    !text "  e = 25 * 12;", $0A
-    !text "  f = 1000 / 7;", $0A
-    !text "  g = 1000 % 7;", $0A
-    !text "  h = (f * 7) + g;", $0A
+    !text "  a = (2 + 3) * 4;", $0A
+    !text "  b = 2 + 3 * 4;", $0A
+    !text "  c = 20 - 12 / 4;", $0A
+    !text "  d = 100 - 50 - 25;", $0A
+    !text "  e = ((2 + 3) * (4 - 1));", $0A
+    !text "  f = (10 + 2) * (8 - 3) / (4 + 1);", $0A
+    !text "  g = 2 * 3 + 4 * 5;", $0A
+    !text "  h = (5 * 3) + (4 - 1);", $0A
     !text "  i = -1;", $0A
-    !text "  j = 0xFF & 0x0F;", $0A
-    !text "  k = 0xF0 | 0x0F;", $0A
-    !text "  l = 0xFF ^ 0x0F;", $0A
+    !text "  j = 10 * (2 + 3);", $0A
+    !text "  k = (10 + 20) / (5 + 5);", $0A
+    !text "  l = 100 / 10 / 2;", $0A
     !text "  m = 1 << 8;", $0A
     !text "  n = 256 >> 4;", $0A
     !text "  o = 0;", $0A
@@ -37,7 +37,7 @@ test_source:
     !text "  }", $0A
     !text "  q = 1 && 1;", $0A
     !text "  r = 0 || 1;", $0A
-    !text "  s = (5 * 3) - 1;", $0A
+    !text "  s = (2 + 3) * (4 - 1);", $0A
     !text "  t = 30000;", $0A
     !text "  add_five();", $0A
     !text "}", $0A

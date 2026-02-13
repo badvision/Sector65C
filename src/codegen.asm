@@ -167,6 +167,48 @@ emit_push_r0_to_r1:
     jsr emit_byte
     rts
 
+; --- emit_push_r1_stack ---
+; Emit code to push R1 onto hardware stack
+; Emits: LDA R1_H / PHA / LDA R1 / PHA
+emit_push_r1_stack:
+    lda #$A5           ; LDA zp
+    jsr emit_byte
+    lda #R1_H
+    jsr emit_byte
+
+    lda #$48           ; PHA
+    jsr emit_byte
+
+    lda #$A5           ; LDA zp
+    jsr emit_byte
+    lda #R1
+    jsr emit_byte
+
+    lda #$48           ; PHA
+    jsr emit_byte
+    rts
+
+; --- emit_pop_r1_stack ---
+; Emit code to pop from hardware stack into R1
+; Emits: PLA / STA R1 / PLA / STA R1_H
+emit_pop_r1_stack:
+    lda #$68           ; PLA
+    jsr emit_byte
+
+    lda #$85           ; STA zp
+    jsr emit_byte
+    lda #R1
+    jsr emit_byte
+
+    lda #$68           ; PLA
+    jsr emit_byte
+
+    lda #$85           ; STA zp
+    jsr emit_byte
+    lda #R1_H
+    jsr emit_byte
+    rts
+
 ; --- emit_add16 ---
 ; Emit inline 16-bit add (R0 = R1 + R0)
 ; Emits: CLC / LDA R0 / ADC R1 / STA R0 / LDA R0+1 / ADC R1+1 / STA R0+1

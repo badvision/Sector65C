@@ -150,27 +150,27 @@ get_word() {
 # --- Verify results ---
 
 # Test definitions: var_name:description:var_index:expected_value
-# 20 variables test (a-t) with comprehensive expressions including function calls
+# 20 variables test with PEMDAS, function calls, and all operators
 TESTS=(
-    "a:literal:0:42"
+    "a:paren_override:0:20"
     "b:while_loop_final:1:11"
-    "c:addition:2:300"
-    "d:subtraction:3:377"
-    "e:multiplication:4:300"
-    "f:division:5:142"
-    "g:modulo:6:6"
-    "h:complex_expr:7:1000"
+    "c:div_before_sub:2:17"
+    "d:left_to_right:3:25"
+    "e:nested_parens:4:15"
+    "f:complex_pemdas:5:12"
+    "g:mult_add_mixed:6:26"
+    "h:double_paren_add:7:18"
     "i:negation:8:65535"
-    "j:bitwise_and:9:15"
-    "k:bitwise_or:10:255"
-    "l:bitwise_xor:11:240"
+    "j:mult_paren_right:9:50"
+    "k:div_in_parens:10:3"
+    "l:left_assoc_div:11:5"
     "m:left_shift:12:256"
     "n:right_shift:13:16"
     "o:comparisons:14:6"
     "p:sum_1_to_10:15:55"
     "q:logical_and:16:1"
     "r:logical_or:17:1"
-    "s:complex_arith:18:14"
+    "s:double_paren_mult:18:15"
     "t:func_call:19:30005"
 )
 

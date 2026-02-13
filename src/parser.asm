@@ -389,8 +389,10 @@ logical_or_loop:
     cmp #TOK_LOR
     bne logical_or_done
     jsr emit_push_r0_to_r1
+    jsr emit_push_r1_stack
     jsr tokenize
     jsr parse_logical_and
+    jsr emit_pop_r1_stack
     lda #<LOR16
     ldx #>LOR16
     jsr emit_jsr
@@ -407,8 +409,10 @@ logical_and_loop:
     cmp #TOK_LAND
     bne logical_and_done
     jsr emit_push_r0_to_r1
+    jsr emit_push_r1_stack
     jsr tokenize
     jsr parse_bitwise_or
+    jsr emit_pop_r1_stack
     lda #<LAND16
     ldx #>LAND16
     jsr emit_jsr
@@ -429,14 +433,18 @@ logical_loop:
     rts
 logical_is_or:
     jsr emit_push_r0_to_r1
+    jsr emit_push_r1_stack
     jsr tokenize
     jsr parse_bitand
+    jsr emit_pop_r1_stack
     jsr emit_or16
     jmp logical_loop
 logical_is_xor:
     jsr emit_push_r0_to_r1
+    jsr emit_push_r1_stack
     jsr tokenize
     jsr parse_bitand
+    jsr emit_pop_r1_stack
     jsr emit_xor16
     jmp logical_loop
 
@@ -448,8 +456,10 @@ bitand_loop:
     cmp #TOK_AMP
     bne bitand_done
     jsr emit_push_r0_to_r1
+    jsr emit_push_r1_stack
     jsr tokenize
     jsr parse_comparison
+    jsr emit_pop_r1_stack
     jsr emit_and16
     jmp bitand_loop
 bitand_done:
@@ -474,8 +484,10 @@ parse_comparison:
 cmp_is_cmp:
     pha
     jsr emit_push_r0_to_r1
+    jsr emit_push_r1_stack
     jsr tokenize
     jsr parse_shift
+    jsr emit_pop_r1_stack
     pla
     jsr emit_comparison
 cmp_no_cmp:
@@ -493,16 +505,20 @@ shift_loop:
     rts
 shift_is_lshift:
     jsr emit_push_r0_to_r1
+    jsr emit_push_r1_stack
     jsr tokenize
     jsr parse_additive
+    jsr emit_pop_r1_stack
     lda #<SHL16
     ldx #>SHL16
     jsr emit_jsr
     jmp shift_loop
 shift_is_rshift:
     jsr emit_push_r0_to_r1
+    jsr emit_push_r1_stack
     jsr tokenize
     jsr parse_additive
+    jsr emit_pop_r1_stack
     lda #<SHR16
     ldx #>SHR16
     jsr emit_jsr
@@ -520,14 +536,18 @@ additive_loop:
     rts
 additive_is_plus:
     jsr emit_push_r0_to_r1
+    jsr emit_push_r1_stack
     jsr tokenize
     jsr parse_multiplicative
+    jsr emit_pop_r1_stack
     jsr emit_add16
     jmp additive_loop
 additive_is_minus:
     jsr emit_push_r0_to_r1
+    jsr emit_push_r1_stack
     jsr tokenize
     jsr parse_multiplicative
+    jsr emit_pop_r1_stack
     jsr emit_sub16
     jmp additive_loop
 
@@ -545,24 +565,30 @@ mult_loop:
     rts
 mult_is_star:
     jsr emit_push_r0_to_r1
+    jsr emit_push_r1_stack
     jsr tokenize
     jsr parse_unary
+    jsr emit_pop_r1_stack
     lda #<MUL16
     ldx #>MUL16
     jsr emit_jsr
     jmp mult_loop
 mult_is_slash:
     jsr emit_push_r0_to_r1
+    jsr emit_push_r1_stack
     jsr tokenize
     jsr parse_unary
+    jsr emit_pop_r1_stack
     lda #<DIV16
     ldx #>DIV16
     jsr emit_jsr
     jmp mult_loop
 mult_is_percent:
     jsr emit_push_r0_to_r1
+    jsr emit_push_r1_stack
     jsr tokenize
     jsr parse_unary
+    jsr emit_pop_r1_stack
     lda #<MOD16
     ldx #>MOD16
     jsr emit_jsr
