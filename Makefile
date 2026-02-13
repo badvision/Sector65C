@@ -12,19 +12,8 @@ COMPILER_MODULES = src/tokenizer.asm src/symbols.asm src/parser.asm src/codegen.
 RUNTIME_MODULES = src/runtime/math.asm src/runtime/compare.asm src/runtime/io.asm
 INCLUDES = src/include/zeropage.inc src/include/memory.inc src/include/tokens.inc
 
-# Test files
-TEST_HARNESS = tests/harness.asm
-TEST_MATH_SRC = tests/test_math.asm
-TEST_COMPARE_SRC = tests/test_compare.asm
-TEST_TOKENIZER_SRC = tests/test_tokenizer.asm
-TEST_SYMBOLS_SRC = tests/test_symbols.asm
-
 # Outputs
 COMPILER_BIN = $(BUILD_DIR)/compiler.bin
-TEST_MATH_BIN = $(BUILD_DIR)/test_math.bin
-TEST_COMPARE_BIN = $(BUILD_DIR)/test_compare.bin
-TEST_TOKENIZER_BIN = $(BUILD_DIR)/test_tokenizer.bin
-TEST_SYMBOLS_BIN = $(BUILD_DIR)/test_symbols.bin
 
 .PHONY: all test clean help
 
@@ -35,32 +24,10 @@ $(COMPILER_BIN): $(COMPILER_SRC) $(COMPILER_MODULES) $(RUNTIME_MODULES) $(INCLUD
 	$(ACME) $(ACME_FLAGS) -o $@ -l $(BUILD_DIR)/compiler.lst $(COMPILER_SRC)
 	@echo "Compiler built: $@ ($$(wc -c < $@) bytes)"
 
-test: $(TEST_MATH_BIN) $(TEST_COMPARE_BIN) $(TEST_TOKENIZER_BIN) $(TEST_SYMBOLS_BIN)
-	@echo "Tests assembled successfully"
-	@echo "  $(TEST_MATH_BIN)"
-	@echo "  $(TEST_COMPARE_BIN)"
-	@echo "  $(TEST_TOKENIZER_BIN)"
-	@echo "  $(TEST_SYMBOLS_BIN)"
-
-$(TEST_MATH_BIN): $(TEST_MATH_SRC) $(TEST_HARNESS) src/runtime/math.asm $(INCLUDES)
-	@mkdir -p $(BUILD_DIR)
-	$(ACME) $(ACME_FLAGS) -o $@ -l $(BUILD_DIR)/test_math.lst $(TEST_MATH_SRC)
-	@echo "Built: $@"
-
-$(TEST_COMPARE_BIN): $(TEST_COMPARE_SRC) $(TEST_HARNESS) src/runtime/compare.asm $(INCLUDES)
-	@mkdir -p $(BUILD_DIR)
-	$(ACME) $(ACME_FLAGS) -o $@ -l $(BUILD_DIR)/test_compare.lst $(TEST_COMPARE_SRC)
-	@echo "Built: $@"
-
-$(TEST_TOKENIZER_BIN): $(TEST_TOKENIZER_SRC) $(TEST_HARNESS) src/tokenizer.asm $(INCLUDES)
-	@mkdir -p $(BUILD_DIR)
-	$(ACME) $(ACME_FLAGS) -o $@ -l $(BUILD_DIR)/test_tokenizer.lst $(TEST_TOKENIZER_SRC)
-	@echo "Built: $@"
-
-$(TEST_SYMBOLS_BIN): $(TEST_SYMBOLS_SRC) $(TEST_HARNESS) src/symbols.asm $(INCLUDES)
-	@mkdir -p $(BUILD_DIR)
-	$(ACME) $(ACME_FLAGS) -o $@ -l $(BUILD_DIR)/test_symbols.lst $(TEST_SYMBOLS_SRC)
-	@echo "Built: $@"
+# Integration test: build compiler, run on JACE Apple IIe emulator, verify results
+# Requires: JACE_DIR environment variable pointing to JACE emulator checkout
+test: $(COMPILER_BIN)
+	@tools/run_tests.sh
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -71,6 +38,9 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "  all          - Build compiler (default)"
-	@echo "  test         - Build test binaries"
+	@echo "  test         - Run integration tests on JACE emulator"
 	@echo "  clean        - Remove build artifacts"
 	@echo "  help         - Show this help message"
+	@echo ""
+	@echo "Testing requires JACE Apple IIe emulator:"
+	@echo "  JACE_DIR=/path/to/jace make test"

@@ -4,8 +4,11 @@
 !source "src/include/zeropage.inc"
 !source "src/include/tokens.inc"
 
-; Identifier buffer for parsing identifiers
-ident_buffer = MEM_COMPILER  ; Use first 32 bytes of compiler memory
+; Identifier buffer placed at start of compiler memory
+; This overlaps with entry/initialization code, but that's safe because
+; the entry code is only executed once at startup and becomes dead code
+; after the compiler enters its parse loop.
+ident_buffer = MEM_COMPILER
 
 ; --- tokenize ---
 ; Parse next token from source buffer

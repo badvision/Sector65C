@@ -16,7 +16,7 @@ str_temp_idx = ZP_TMP0_H  ; Byte: current index in string
 ; Initialize symbol table
 ; Sets all entries to empty
 sym_init:
-    ; Clear symbol table memory ($A000-$BEFF = 8K)
+    ; Clear symbol table memory ($A000-$BFFF = 8K for 256 entries)
     lda #<MEM_SYMTAB
     sta ZP_SYM_PTR
     lda #>MEM_SYMTAB
@@ -27,6 +27,7 @@ sym_init:
 
 sym_init_clear_page:
     ; Clear one page (256 bytes)
+    lda #0            ; FIX: Reset A to 0 for clearing (gets corrupted by page check)
 sym_init_clear_loop:
     sta (ZP_SYM_PTR),y
     iny

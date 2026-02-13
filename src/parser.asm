@@ -5,8 +5,9 @@
 !source "src/include/memory.inc"
 !source "src/include/tokens.inc"
 
-; External references
-ident_buffer = MEM_COMPILER
+; External buffer references
+; ident_buffer is at MEM_COMPILER (overlaps dead entry code - this is safe)
+; assign_lhs_name and decl_saved_name are defined after this module
 
 ; Main address storage (for patching initial JMP)
 main_addr:
@@ -55,6 +56,8 @@ decl_check_ident:
     beq decl_have_ident
     jmp parse_error
 decl_have_ident:
+    ; Save hash and setup pointer to ident_buffer
+    ; Tokenizing operators (";", "(", ")", "{") does NOT modify ZP_TMP0 or ident_buffer
     lda ZP_TOKEN_VAL
     pha
     lda #<ident_buffer
@@ -70,7 +73,7 @@ decl_have_ident:
     beq decl_have_semi
     jmp parse_error
 decl_have_semi:
-    ; Variable declaration
+    ; Variable declaration - ZP_TMP0 still points to ident_buffer
     pla
     sta ZP_TOKEN_VAL
     pla
@@ -99,6 +102,7 @@ func_have_lbrace:
     lda ZP_CODEGEN_PTR_H
     sta ZP_TMP1_H
 
+    ; Insert function symbol - ZP_TMP0 still points to ident_buffer from decl_have_ident
     pla
     sta ZP_TOKEN_VAL
     pla
@@ -106,7 +110,7 @@ func_have_lbrace:
     bcs func_insert_ok
     jmp parse_error
 func_insert_ok:
-    ; Check if main
+    ; Check if main (ident_buffer preserved through operator tokenization)
     lda ident_buffer
     cmp #'m'
     bne func_not_main
@@ -294,10 +298,6 @@ asm_have_semi:
 ; --- parse_expression ---
 parse_expression:
     jmp parse_assignment
-
-; Temporary storage for assignment left-hand side
-assign_lhs_name:
-    !fill 28, 0  ; Space to save identifier name
 
 ; --- parse_assignment ---
 parse_assignment:
@@ -728,3 +728,9 @@ parse_error_halt:
 
 parse_error_jmp:
     jmp parse_error
+
+; === Data Buffers (safe to place after code) ===
+; Assignment LHS name - preserves left-hand side of assignments
+; (assignment requires multiple tokenize calls that would overwrite ident_buffer)
+assign_lhs_name:
+    !fill 28, 0  ; Max identifier length (null-terminated)

@@ -8,7 +8,7 @@ This is a hobby project exploring what's possible with a single-pass C compiler 
 
 A working C compiler that runs on an Apple IIe (or emulator). It supports:
 
-- **Variables**: `int` declarations with 16-bit signed values
+- **Variables**: `int` declarations with 16-bit signed values (up to 248 symbols per program)
 - **Functions**: `void` functions with calls (no parameters yet)
 - **Arithmetic**: `+`, `-`, `*`, `/`, `%` (division uses binary shift-and-subtract with result caching)
 - **Unary minus**: `-expr`
@@ -25,7 +25,7 @@ The compiler is a recursive descent parser that emits 65C02 machine code in a si
 
 ## What It Isn't (Yet)
 
-- **No file I/O**: Source code is currently embedded in the compiler binary. ProDOS file loading is stubbed but not wired up.
+- **No file I/O**: Source code is currently embedded in the compiler binary at compile time.
 - **No function parameters or return values**: Functions are `void name() { ... }` only.
 - **No arrays or strings**: Only scalar `int` (16-bit) variables.
 - **No `else` clause**: `if` without `else`.
@@ -33,7 +33,7 @@ The compiler is a recursive descent parser that emits 65C02 machine code in a si
 - **No preprocessor**: No `#include`, `#define`, etc.
 - **No separate compilation**: Everything compiles as a single translation unit.
 - **No standard library**: No `printf`, `malloc`, etc. Use `asm` for direct hardware access.
-- **Not self-hosting**: The compiler is hand-written in assembly, not compiled from C (yet).
+- **Not self-hosting**: The compiler is hand-written in assembly, not compiled from C.
 
 ## Architecture
 
@@ -76,14 +76,23 @@ When the compiler sees `q = a / b;` followed by `r = a % b;`, the division routi
 - [ACME cross-assembler](https://sourceforge.net/projects/acme-crossass/) (`brew install acme` on macOS)
 - An Apple IIe emulator for testing (e.g., [JACE](https://github.com/badvision/jace))
 
-### Build
+### Build and Test
 
 ```bash
 make all          # Build compiler binary
+make test         # Run integration tests (requires JACE_DIR)
 make clean        # Clean build artifacts
 ```
 
 Output: `build/compiler.bin` (loads at $4000)
+
+Testing requires the [JACE](https://github.com/badvision/jace) Apple IIe emulator:
+
+```bash
+JACE_DIR=/path/to/jace make test
+```
+
+The test suite compiles a comprehensive C program (20 variables, all operators), executes it on the emulated Apple IIe, and verifies the resulting variable values in memory.
 
 ### Running
 
@@ -95,31 +104,14 @@ BLOAD COMPILER.BIN,A$4000
 CALL 16384
 ```
 
-Or with JACE terminal mode:
-
-```bash
-cd /path/to/jace
-mvn -q exec:java -Dexec.mainClass="jace.JaceLauncher" -Dexec.args="--terminal" <<'EOF'
-reset
-loadbin /path/to/sectorc65/build/compiler.bin 4000
-monitor
-4000G
-back
-run 100000000
-showtext
-monitor
-3800.3820
-back
-qq
-EOF
-```
+The compiler will compile and execute the embedded test program from `tests/comprehensive.asm`. To use a different test program, edit `src/main.asm` and change the `!source` line to point to your test file.
 
 ## Project Structure
 
 ```
 sectorc65/
   src/
-    main.asm              Entry point, banner, embedded test source
+    main.asm              Entry point, banner, test program include
     tokenizer.asm         Lexer: whitespace, comments, operators, identifiers, numbers
     symbols.asm           Hash table: lookup, insert, address allocation
     parser.asm            Recursive descent: declarations, statements, expressions
@@ -133,15 +125,18 @@ sectorc65/
       math.asm            MUL16, DIV16, MOD16, SHL16, SHR16, NEG16, LAND16, LOR16
       compare.asm         CMP_EQ16, CMP_LT16, CMP_GT16, CMP_LE16, CMP_GE16, CMP_NE16
       io.asm              ProDOS I/O stubs (PUTCHAR, PUTNUM)
-  examples/               Example C programs
-  tests/                  Test harness and unit tests
-  tools/                  Build utilities
+  tests/
+    comprehensive.asm     Default test program (20 variables, all operators)
+    harness.asm           Test harness (unit test framework)
+    test_*.asm            Unit tests for individual compiler modules
+  tools/
+    run_tests.sh          Integration test runner (JACE automation)
   Makefile                Build system
 ```
 
 ## Example Program
 
-The compiler currently compiles an embedded test program. Here's what the C subset looks like:
+The compiler includes a comprehensive test program (`tests/comprehensive.asm`) that exercises all supported features. Here's a simpler example showing the C subset:
 
 ```c
 int count;
@@ -155,12 +150,14 @@ void main() {
     count = count + 1;
     sum = sum + count;
   }
-  x = 1000 / 7;       // x = 142
+  x = 1000 / 7;       // x = 142, remainder cached for modulo
   if (x > 100 && sum == 55) {
     x = -1;            // success: x = 0xFFFF
   }
 }
 ```
+
+The full test program uses 20 variables and tests all arithmetic operators, comparisons, logical operations, control flow, and function calls.
 
 ## Lineage
 
