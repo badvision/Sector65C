@@ -1,4 +1,4 @@
-# SectorC65 - A C Compiler for the 65C02
+# Sector65C - A C Compiler for the 65C02
 
 A port of [SectorC](https://github.com/xorvoid/sectorc) (the x86 boot-sector C compiler) to the 65C02 processor, targeting the Apple IIe under ProDOS. Written entirely in 65C02 assembly, the compiler runs natively on the Apple IIe and compiles a subset of C directly to machine code in memory.
 
