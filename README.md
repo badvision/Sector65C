@@ -161,7 +161,7 @@ The full test program uses 20 variables and tests all arithmetic operators, comp
 
 ## Lineage
 
-Inspired by [SectorC](https://github.com/xorvoid/sectorc) by xorvoid -- a C compiler that fits in a 512-byte x86 boot sector. SectorC65 is not (and will never be) 512 bytes, but it shares the spirit of compiling C on minimal hardware with minimal tooling.
+Inspired by [SectorC](https://github.com/xorvoid/sectorc) by xorvoid -- a C compiler that fits in a 512-byte x86 boot sector. Sector65C is not (and will never be) 512 bytes, but it shares the spirit of compiling C on minimal hardware with minimal tooling.
 
 ## License
 
